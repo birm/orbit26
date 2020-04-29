@@ -13,6 +13,7 @@ X_POS byte;
 Y_POS byte;
 METRONOME byte;
 MELODY_PTR word;
+MEL_COLOR_PTR word;
 
   seg Code
   org $F000
@@ -32,6 +33,10 @@ Reset:
   sta MELODY_PTR
   lda #>Melody
   sta MELODY_PTR+1
+  lda #<MelodyColors
+  sta MEL_COLOR_PTR
+  lda #>MelodyColors
+  sta MEL_COLOR_PTR+1
 
 Screen:
 ;----------------
@@ -50,14 +55,15 @@ Screen:
 ;----------------
   jsr PercussionSound
   jsr MelodySound
+  ldx METRONOME
+  dex
+  stx METRONOME
+  lda #%00000010
   REPEAT 37
     sta WSYNC
   REPEND
   lda $0
   sta VBLANK
-  stx METRONOME
-  dex
-  stx METRONOME
 
 IsRight:
   lda #$80
@@ -84,17 +90,31 @@ IsUp:
   inc Y_POS
 
 IsFire:
-    lda #$80
+    lda #$F0
     bit INPT4
     bne IsNone
-    stx METRONOME
+    ldx METRONOME
     inx
     stx METRONOME
 
 IsNone:
   lda $0
 
-  jmp Screen
+
+  ldx #192		 ; counter for 192 visible scanlines
+LoopVisible:
+  lda METRONOME ; 0-255
+  REPEAT 5
+     lsr ; divide by 2^5
+  REPEND
+  tay
+  lda (MEL_COLOR_PTR),Y ; get the color associated with this beat
+  sta COLUBK
+  sta WSYNC
+	dex
+	bne LoopVisible  ; loop while X != 0
+
+  jmp Screen ; next frame
 
 PercussionSound subroutine
   lda X_POS ; 0-255
@@ -108,7 +128,7 @@ PercussionSound subroutine
   REPEND
   sta AUDC0 ; voice via y position
   lda METRONOME
-  REPEAT 4
+  REPEAT 1
      lsr ; divide by 2^4
   REPEND
   sta AUDV0
@@ -117,7 +137,7 @@ PercussionSound subroutine
 MelodySound subroutine
   lda METRONOME ; 0-255
   REPEAT 5
-     lsr ; divide by 2^6
+     lsr ; divide by 2^5
   REPEND
   tay
   lda (MELODY_PTR),Y ; get the note associated with this beat
@@ -140,6 +160,16 @@ Melody:
   .byte #$06
   .byte #$02
   .byte #$04
+
+MelodyColors:
+  .byte #$84
+  .byte #$84
+  .byte #$86
+  .byte #$88
+  .byte #$8A
+  .byte #$8A
+  .byte #$82
+  .byte #$84
 ;---------------
 ; PAD, reset
 ;---------------
