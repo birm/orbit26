@@ -162,14 +162,14 @@ Melody:
   .byte #$04
 
 MelodyColors:
-  .byte #$84
-  .byte #$84
+  .byte #$86
   .byte #$86
   .byte #$88
   .byte #$8A
-  .byte #$8A
-  .byte #$82
+  .byte #$8C
+  .byte #$8C
   .byte #$84
+  .byte #$88
 ;---------------
 ; PAD, reset
 ;---------------
