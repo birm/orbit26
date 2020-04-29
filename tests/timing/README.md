@@ -2,9 +2,9 @@
 
 (test 2 for orbit 26 - birm)
 
-X axis mapped to frequency/tone; Y axis mapped to control/voice; holding down fire/trigger doubles speed.
+X axis mapped to frequency/tone; Y axis mapped to control/voice; holding down fire/trigger for sustain/pause
 
-It's a little spotty. No graphics, outside of just sending syncs.
+It's still a little spotty. No graphics, outside of just sending syncs.
 
 # Results/Notes
 * Holding down left and right can make some iconic sound effects

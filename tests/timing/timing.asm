@@ -12,6 +12,7 @@
 X_POS byte;
 Y_POS byte;
 METRONOME byte;
+MELODY_PTR word;
 
   seg Code
   org $F000
@@ -27,6 +28,10 @@ Reset:
   sta Y_POS
   lda #$FF
   sta METRONOME
+  lda #<Melody
+  sta MELODY_PTR
+  lda #>Melody
+  sta MELODY_PTR+1
 
 Screen:
 ;----------------
@@ -43,7 +48,8 @@ Screen:
 ;----------------
 ; per-frame, before draw
 ;----------------
-  jsr MakeSound
+  jsr PercussionSound
+  jsr MelodySound
   REPEAT 37
     sta WSYNC
   REPEND
@@ -82,7 +88,7 @@ IsFire:
     bit INPT4
     bne IsNone
     stx METRONOME
-    dex
+    inx
     stx METRONOME
 
 IsNone:
@@ -90,7 +96,7 @@ IsNone:
 
   jmp Screen
 
-MakeSound subroutine
+PercussionSound subroutine
   lda X_POS ; 0-255
   REPEAT 3
      lsr ; divide by 2^3
@@ -100,13 +106,40 @@ MakeSound subroutine
   REPEAT 4
      lsr ; divide by 2^4
   REPEND
-  sta AUDC0 ; note via x position
+  sta AUDC0 ; voice via y position
   lda METRONOME
-  REPEAT 7
-     lsr ; divide by 2^8
+  REPEAT 4
+     lsr ; divide by 2^4
   REPEND
   sta AUDV0
   rts
+
+MelodySound subroutine
+  lda METRONOME ; 0-255
+  REPEAT 5
+     lsr ; divide by 2^6
+  REPEND
+  tay
+  lda (MELODY_PTR),Y ; get the note associated with this beat
+  sta AUDF1 ; note via timing
+  lda #$1
+  sta AUDC1 ; preset voice
+  lda #8
+  sta AUDV1
+  rts
+
+;---------------
+; Store a "song"
+;---------------
+Melody:
+  .byte #$03
+  .byte #$03
+  .byte #$04
+  .byte #$05
+  .byte #$06
+  .byte #$06
+  .byte #$02
+  .byte #$04
 ;---------------
 ; PAD, reset
 ;---------------

@@ -86,7 +86,7 @@ MakeSound subroutine
   REPEAT 4
      lsr ; divide by 2^4
   REPEND
-  sta AUDC0 ; note via x position
+  sta AUDC0 ; voice via y position
   lda #1 ; volume
   sta AUDV0
   rts
