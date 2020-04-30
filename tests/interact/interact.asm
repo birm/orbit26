@@ -13,6 +13,7 @@ X_POS byte;
 Y_POS byte;
 METRONOME byte;
 MET_TIMER byte;
+SCORE byte;
 MELODY_PTR word;
 MEL_COLOR_PTR word;
 SPEED_FACTOR byte;
@@ -26,6 +27,10 @@ Reset:
 ;----------------
 ; init vars
 ;----------------
+  lda #$80
+  sta SCORE
+  lda #$1C
+  sta COLUPF
   lda #$80 ; middle of screen
   sta X_POS
   sta Y_POS
@@ -57,7 +62,7 @@ Screen:
   lda #0
   sta VSYNC
 ;----------------
-; per-frame, before draw
+; sound routines
 ;----------------
   jsr PercussionSound
   jsr MelodySound
@@ -82,6 +87,10 @@ SkipMetronome:
   REPEND
   lda $0
   sta VBLANK
+
+;-------------
+;input checks
+;-------------
 
 IsRight:
   lda #$80
@@ -111,14 +120,45 @@ IsFire:
   lda #$F0
   bit INPT4
   bne IsNone
-  nop ; put interactive score code here
+  lda METRONOME
+  and #%00000011 ; only update score once per cycle
+  bne IsNone ; check if close enough after too
+  lda METRONOME
+  and #%00000111 ; is this a hit?
+  bne IsMiss
+  ldx SCORE
+  inx
+  stx SCORE
+  jmp IsNone
+
+IsMiss:
+  ldx SCORE
+  cpx #0
+  beq IsNone
+  dex
+  stx SCORE
 
 IsNone:
-  lda $0
+  nop
 
-
-  ldx #192		 ; counter for 192 visible scanlines
+;-------------------
+; display functions
+;-------------------
+  ldx #190		 ; counter for 192 visible scanlines
 LoopVisible:
+  lda METRONOME ; 0-255
+  REPEAT 3
+     lsr ; divide by 2^3
+  REPEND
+  tay
+  lda (MEL_COLOR_PTR),Y ; get the color associated with this beat
+  sta COLUBK
+  sta WSYNC
+	dex
+	bne LoopVisible  ; loop while X != 0
+
+  ldx #3
+ScoreVisible:
   lda METRONOME ; 0-255
   REPEAT 3
      lsr ; divide by 2^4
@@ -127,8 +167,13 @@ LoopVisible:
   lda (MEL_COLOR_PTR),Y ; get the color associated with this beat
   sta COLUBK
   sta WSYNC
-	dex
-	bne LoopVisible  ; loop while X != 0
+  lda SCORE
+  sta PF1
+  dex
+  bne ScoreVisible  ; loop while X != 0
+
+  lda #0
+  sta PF1
 
   jmp Screen ; next frame
 

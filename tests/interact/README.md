@@ -2,9 +2,9 @@
 
 (test 3 for orbit 26 - birm)
 
-Get the timing right to score points.
+Get the timing right to score points (8th notes).
 
 # Results/Notes
-* Holding down left and right can make some iconic sound effects
-* Holding up and down can be, but rarely seems to be, interesting
-* There will be limits in sound, but just need cue, beat, and feedback sounds
+* It took some time to balance points within reason.
+* Points are rendered in binary, but the atari TIA mirrors the middle, so it's hard to read. I'll actually have to render something for score.
+* Instead of a bunch of pointers in memory, I just put the whole song in a blob. Seems more assembly-like. Also was easier.
