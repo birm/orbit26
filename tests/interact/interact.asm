@@ -1,6 +1,6 @@
 ;-----------
 ; BIRM
-; Test 2 - timing
+; Test 3 - interaction
 ;-----------
   processor 6502
   include "vcs.h"
@@ -12,8 +12,10 @@
 X_POS byte;
 Y_POS byte;
 METRONOME byte;
+MET_TIMER byte;
 MELODY_PTR word;
 MEL_COLOR_PTR word;
+SPEED_FACTOR byte;
 
   seg Code
   org $F000
@@ -29,6 +31,10 @@ Reset:
   sta Y_POS
   lda #$FF
   sta METRONOME
+  lda #$00
+  sta MET_TIMER
+  lda #$80
+  sta SPEED_FACTOR
   lda #<Melody
   sta MELODY_PTR
   lda #>Melody
@@ -55,9 +61,21 @@ Screen:
 ;----------------
   jsr PercussionSound
   jsr MelodySound
+
+Metronome:
+  lda MET_TIMER
+  adc SPEED_FACTOR
+  sta MET_TIMER
+  bcc SkipMetronome
+  sec
+  sta MET_TIMER
   ldx METRONOME
   dex
   stx METRONOME
+
+SkipMetronome:
+  nop
+
   lda #%00000010
   REPEAT 37
     sta WSYNC
@@ -93,9 +111,7 @@ IsFire:
   lda #$F0
   bit INPT4
   bne IsNone
-  ldx METRONOME
-  inx
-  stx METRONOME
+  nop ; put interactive score code here
 
 IsNone:
   lda $0
@@ -104,8 +120,8 @@ IsNone:
   ldx #192		 ; counter for 192 visible scanlines
 LoopVisible:
   lda METRONOME ; 0-255
-  REPEAT 5
-     lsr ; divide by 2^5
+  REPEAT 3
+     lsr ; divide by 2^4
   REPEND
   tay
   lda (MEL_COLOR_PTR),Y ; get the color associated with this beat
@@ -136,11 +152,11 @@ PercussionSound subroutine
 
 MelodySound subroutine
   lda METRONOME ; 0-255
-  REPEAT 5
-     lsr ; divide by 2^5
+  REPEAT 3
+     lsr ; divide by 2^3 to get 0-32
   REPEND
-  tay
-  lda (MELODY_PTR),Y ; get the note associated with this beat
+  tax
+  lda Melody,X ; get the note associated with this beat
   sta AUDF1 ; note via timing
   lda #$1
   sta AUDC1 ; preset voice
@@ -151,6 +167,7 @@ MelodySound subroutine
 ;---------------
 ; Store a "song"
 ;---------------
+
 Melody:
   .byte #$03
   .byte #$03
@@ -161,6 +178,33 @@ Melody:
   .byte #$02
   .byte #$04
 
+  .byte #$05
+  .byte #$05
+  .byte #$06
+  .byte #$07
+  .byte #$08
+  .byte #$08
+  .byte #$05
+  .byte #$06
+
+  .byte #$06
+  .byte #$03
+  .byte #$06
+  .byte #$03
+  .byte #$08
+  .byte #$04
+  .byte #$03
+  .byte #$03
+
+  .byte #$05
+  .byte #$05
+  .byte #$06
+  .byte #$07
+  .byte #$08
+  .byte #$08
+  .byte #$05
+  .byte #$06
+
 MelodyColors:
   .byte #$86
   .byte #$86
@@ -170,6 +214,33 @@ MelodyColors:
   .byte #$8C
   .byte #$84
   .byte #$88
+
+  .byte #$81
+  .byte #$81
+  .byte #$83
+  .byte #$85
+  .byte #$87
+  .byte #$87
+  .byte #$80
+  .byte #$83
+
+  .byte #$56
+  .byte #$53
+  .byte #$56
+  .byte #$53
+  .byte #$58
+  .byte #$54
+  .byte #$53
+  .byte #$53
+
+  .byte #$81
+  .byte #$81
+  .byte #$83
+  .byte #$85
+  .byte #$87
+  .byte #$87
+  .byte #$80
+  .byte #$83
 ;---------------
 ; PAD, reset
 ;---------------

@@ -5,6 +5,5 @@
 X axis mapped to frequency/tone; Y axis mapped to control/voice; holding down fire/trigger for sustain/pause
 
 # Results/Notes
-* Holding down left and right can make some iconic sound effects
-* Holding up and down can be, but rarely seems to be, interesting
-* There will be limits in sound, but just need cue, beat, and feedback sounds
+* Probably want longer song memory; defereence twice?
+* I like the color changes on beat.
