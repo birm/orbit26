@@ -9,3 +9,4 @@ Add Graphics to Interact Test
 * Use "ship" sprite to describe hit or miss.
 * some interesting issue with graphics
 * known issue with graphics (lazy loop construction), so padded with zero
+* got jitter, avoding poorly made interesting effect, keeping.

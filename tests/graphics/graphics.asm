@@ -155,8 +155,8 @@ IsNone:
 ;-------------------
 ; display functions
 ;-------------------
-  lda #100		 ; Before the ship
-  sbc SCORE
+  lda #100		 ; Above the ship
+  ;sbc SCORE
   tax
 LoopVisible1:
   lda METRONOME ; 0-255
@@ -171,7 +171,7 @@ LoopVisible1:
 	dex
 	bne LoopVisible1  ; loop while X != 0
 
-  ldx #8 ; 8 lines of ship visibility
+  ldx #7 ; 8 lines of ship visibility
 PlayerVisible:
   lda METRONOME ; 0-255
   REPEAT 3
@@ -186,16 +186,19 @@ PlayerVisible:
   lda ScoreColors,Y ; get planet score color (lower)
   sta COLUP0
   lda Ship,X
+  REPEAT 20
+    nop
+  REPEND
   sta GRP0
   lda #1
   sta WSYNC
   dex
-  bne PlayerVisible  ; loop while X != 0
+  bpl PlayerVisible  ; loop while X >= 0
 
   lda #0
   sta GRP0
 
-  lda #76		 ; after the ship
+  lda #76		 ; between the ship and ground
   adc SCORE
   tax
 LoopVisible2:
@@ -209,9 +212,9 @@ LoopVisible2:
   lda #1
   sta WSYNC
 	dex
-	bne LoopVisible2  ; loop while X != 0
+	bpl LoopVisible2  ; loop while X >= 0
 
-  ldx #8 ; 8 lines of planet visibility
+  ldx #7 ; 8 lines of planet visibility
 PlanetVisible:
   lda METRONOME ; 0-255
   REPEAT 3
@@ -220,16 +223,19 @@ PlanetVisible:
   tay
   lda (MEL_COLOR_PTR),Y ; get the color associated with this beat
   sta COLUBK
-  ldy LEVEL
+  lda SCORE
+  lsr
+  tay
   lda ScoreColors,Y ; get planet score color (upper)
   sta COLUPF
   lda Planet,X
   sta PF1
   lda #$FF
   sta PF2
+  lda #1
   sta WSYNC
   dex
-  bne PlanetVisible  ; loop while X != 0
+  bpl PlanetVisible  ; loop while X >= 0
 
   lda #0
   sta PF2
@@ -376,7 +382,6 @@ MelodyColors:
 ; store graphics
 ;---------------
 Planet:
-  .byte #0 ; lazy padding
   .byte #%01111111
   .byte #%00111111
   .byte #%00011111
@@ -397,7 +402,6 @@ ScoreColors:
   .byte #$C0 ; Dark Green
 
 Ship:
-  .byte #0 ; lazy padding
   .byte #%11000000 ; "good" frame
   .byte #%00100000
   .byte #%10110000
