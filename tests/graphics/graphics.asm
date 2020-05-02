@@ -34,7 +34,7 @@ Reset:
   sta LEVEL
   lda #$00
   sta SCORE
-  lda #$0F
+  lda #$08
   sta NEXT_LEVEL
   lda #$80 ; middle of screen
   sta X_POS
@@ -247,7 +247,7 @@ LevelChange:
   inx; increase level by 1
   stx LEVEL
   lda NEXT_LEVEL
-  adc #$0F
+  adc #$04
   sta NEXT_LEVEL
   lda SPEED_FACTOR
   asl; increase speed by 2x
