@@ -8,3 +8,6 @@ Melody and Percussion with Sustain
 
 ## Interact Test
 Keep beat to a simple "song"
+
+## Graphics Test
+Add orbit themed graphics
